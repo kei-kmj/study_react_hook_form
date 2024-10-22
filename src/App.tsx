@@ -1,7 +1,8 @@
 import './App.css'
-import {Controller, SubmitHandler, useForm} from "react-hook-form";
+import {Controller, SubmitHandler, useFieldArray, useForm} from "react-hook-form";
 import axios from "axios";
-import {Button, TextField} from "@mui/material";
+import {Button, IconButton, TextField} from "@mui/material";
+import {Add as AddIcon, Delete as DeleteIcon} from '@mui/icons-material';
 
 
 type FormValues = {
@@ -9,18 +10,23 @@ type FormValues = {
   email: string
   message: string
 }
+
+type FormArray = {
+  formData: FormValues[];
+};
 export const App = () => {
-  const {control, handleSubmit, formState: {errors}} = useForm<FormValues>(
+  const {control, handleSubmit} = useForm<FormArray>(
     {
       defaultValues: {
-        name: '',
-        email: '',
-        message: ''
+        formData: [{name: '', email: '', message: ''}],
       }
     }
   );
-
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "formData"
+  });
+  const onSubmit: SubmitHandler<FormArray> = async (data) => {
     try {
       const response = await axios.post('https://jsonplaceholder.typicode.com/posts', data)
       console.log("response", response.data)
@@ -33,28 +39,39 @@ export const App = () => {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Controller
-          name="name"
-          control={control}
-          defaultValue=""
-          render={({field}) =>
-            <TextField {...field} label="Name"/>}
-        />
-        <Controller
-          name="email"
-          control={control}
-          defaultValue=""
-          rules={{required: 'Email is required'}}
-          render={({field}) => <TextField {...field} label="Email"/>}
-        />
-        <Controller
-          name="message"
-          control={control}
-          defaultValue=""
-          rules={{required: 'Message is required'}}
-          render={({field}) => <TextField {...field} label="Message"/>}
-        />
-        <Button type="submit">Submit</Button></form>
+        {fields.map((field, index) => (
+          <div key={field.id}>
+            <Controller
+              name={`formData.${index}.name`} // 配列内の各要素にアクセス
+              control={control}
+              render={({field}) => <TextField {...field} label="Name"/>}
+            />
+            <Controller
+              name={`formData.${index}.email`}
+              control={control}
+              render={({field}) => <TextField {...field} label="Email"/>}
+            />
+            <Controller
+              name={`formData.${index}.message`}
+              control={control}
+              render={({field}) => <TextField {...field} label="Message"/>}
+            />
+            <IconButton onClick={() => remove(index)}>
+              <DeleteIcon/>
+            </IconButton>
+          </div>
+        ))}
+        <Button
+          type="button"
+          onClick={() => append({name: '', email: '', message: ''})}
+          startIcon={<AddIcon/>}
+        >
+          Add Form
+        </Button>
+        <Button type="submit" variant="contained" color="primary">
+          Submit
+        </Button>
+      </form>
     </>
   )
 }
