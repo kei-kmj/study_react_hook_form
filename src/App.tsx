@@ -3,6 +3,7 @@ import {Controller, Path, SubmitHandler, useFieldArray, useForm, Control} from "
 import axios from "axios";
 import {Button, IconButton, TextField} from "@mui/material";
 import {Add as AddIcon, Delete as DeleteIcon} from '@mui/icons-material';
+import {useState} from "react";
 
 
 type FormValues = {
@@ -20,10 +21,12 @@ export const App = () => {
     // useFormはReact Hook Formの、フォームの状態を管理するためのカスタムフック
     // control: フォームの状態を管理するためのオブジェクト.Controllerに渡すことで、フォームデータやバリデーションを管理できる
     // reset: フォームの値をリセットする関数
+    // shouldUnregister: アンマウントになっているフォームの値を非登録にするかどうか
     {
       defaultValues: {
         formData: [{name: '', email: '', message: '', isActive: true}],
-      }
+      },
+      shouldUnregister: true
     }
   );
   const {fields, append, remove} = useFieldArray<FormArray, 'formData'>({
@@ -42,11 +45,20 @@ export const App = () => {
 
     }
   }
+  const [showAll, setShowAll] = useState(true)
 
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
+        <Button
+          type="button"
+          onClick={() => setShowAll(prev => !prev)}
+          startIcon={<AddIcon/>}
+        >
+          {showAll ? '有効な行のみ表示' : 'すべての行を表示'}
+        </Button>
         {fields.map((field, index) => (
+          (field.isActive || showAll) && (
           <div key={field.id}>
             <Controller
               name={`formData.${index}.name`}
@@ -70,12 +82,12 @@ export const App = () => {
                 <IconButton onClick={() => field.onChange(!field.value)}>
                   {field.value ? 'Active' : 'Inactive'}
                 </IconButton>
-              )} />
+              )}/>
 
             <IconButton onClick={() => remove(index)}>
               <DeleteIcon/>
             </IconButton>
-          </div>
+          </div>)
         ))}
         <Button
           type="button"
