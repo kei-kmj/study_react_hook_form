@@ -26,6 +26,7 @@ export const App = () => {
       defaultValues: {
         formData: [{name: '', email: '', message: '', isActive: true}],
       },
+      mode: "onBlur",
       shouldUnregister: true
     }
   );
@@ -59,35 +60,53 @@ export const App = () => {
         </Button>
         {fields.map((field, index) => (
           (field.isActive || showAll) && (
-          <div key={field.id}>
-            <Controller
-              name={`formData.${index}.name`}
-              control={control}
-              render={({field}) => <TextField {...field} label="Name"/>}
-            />
-            <Controller
-              name={`formData.${index}.email`}
-              control={control}
-              render={({field}) => <TextField {...field} label="Email"/>}
-            />
-            <Controller
-              name={`formData.${index}.message`}
-              control={control}
-              render={({field}) => <TextField {...field} label="Message"/>}
-            />
-            <Controller
-              name={`formData.${index}.isActive`}
-              control={control}
-              render={({field}) => (
-                <IconButton onClick={() => field.onChange(!field.value)}>
-                  {field.value ? 'Active' : 'Inactive'}
-                </IconButton>
-              )}/>
+            <div key={field.id}>
+              <Controller
+                name={`formData.${index}.name`}
+                rules={{required: 'Name is required', minLength: {value: 1, message: 'Name is too short'}}}
+                control={control}
+                render={({field, fieldState: {error}}) =>
+                  <TextField
+                    {...field}
+                    label="Name"
+                    error={!!error}
+                    helperText={error ? error.message : null}/>}
+              />
+              <Controller
+                name={`formData.${index}.email`}
+                control={control}
+                rules={{
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                    message: 'invalid email address'
+                  }
+                }}
+                render={({field, fieldState: {error}}) =>
+                  <TextField
+                    {...field}
+                    label="Email"
+                    error={!!error}
+                    helperText={error ? error.message : null}/>}
+              />
+              <Controller
+                name={`formData.${index}.message`}
+                control={control}
+                render={({field}) => <TextField {...field} label="Message"/>}
+              />
+              <Controller
+                name={`formData.${index}.isActive`}
+                control={control}
+                render={({field}) => (
+                  <IconButton onClick={() => field.onChange(!field.value)}>
+                    {field.value ? 'Active' : 'Inactive'}
+                  </IconButton>
+                )}/>
 
-            <IconButton onClick={() => remove(index)}>
-              <DeleteIcon/>
-            </IconButton>
-          </div>)
+              <IconButton onClick={() => remove(index)}>
+                <DeleteIcon/>
+              </IconButton>
+            </div>)
         ))}
         <Button
           type="button"
