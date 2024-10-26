@@ -9,6 +9,7 @@ type FormValues = {
   name: string
   email: string
   message: string
+  isActive: boolean
 }
 
 type FormArray = {
@@ -21,7 +22,7 @@ export const App = () => {
     // reset: フォームの値をリセットする関数
     {
       defaultValues: {
-        formData: [{name: '', email: '', message: ''}],
+        formData: [{name: '', email: '', message: '', isActive: true}],
       }
     }
   );
@@ -62,6 +63,15 @@ export const App = () => {
               control={control}
               render={({field}) => <TextField {...field} label="Message"/>}
             />
+            <Controller
+              name={`formData.${index}.isActive`}
+              control={control}
+              render={({field}) => (
+                <IconButton onClick={() => field.onChange(!field.value)}>
+                  {field.value ? 'Active' : 'Inactive'}
+                </IconButton>
+              )} />
+
             <IconButton onClick={() => remove(index)}>
               <DeleteIcon/>
             </IconButton>
