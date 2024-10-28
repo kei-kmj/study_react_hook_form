@@ -22,6 +22,8 @@ export const App = () => {
     // control: フォームの状態を管理するためのオブジェクト.Controllerに渡すことで、フォームデータやバリデーションを管理できる
     // reset: フォームの値をリセットする関数
     // shouldUnregister: アンマウントになっているフォームの値を非登録にするかどうか
+    // values: フォームの値を外部から更新できる
+    // errors: サーバーサイドのエラーを表示できる
     {
       defaultValues: {
         formData: [{name: '', email: '', message: '', isActive: true}],
@@ -30,7 +32,11 @@ export const App = () => {
       shouldUnregister: true
     }
   );
+
+  // useFieldArrayは、動的なフィールドの配列を管理できる
   const {fields, append, remove} = useFieldArray<FormArray, 'formData'>({
+    // fields: 現在のフィールドの配列　.map()でループしてレンダリングする
+    // name: フィールド配列の名前
     control: control,
     name: 'formData',
   });
@@ -38,9 +44,9 @@ export const App = () => {
     try {
       const response = await axios.post('https://jsonplaceholder.typicode.com/posts', data)
 
-      reset()
-
       console.log("response", response.data)
+      reset(response.data)
+
     } catch (error) {
       console.error("error", error)
 
@@ -92,7 +98,8 @@ export const App = () => {
               <Controller
                 name={`formData.${index}.message`}
                 control={control}
-                render={({field}) => <TextField {...field} label="Message"/>}
+                render={({field}) =>
+                  <TextField {...field} label="Message"/>}
               />
               <Controller
                 name={`formData.${index}.isActive`}
