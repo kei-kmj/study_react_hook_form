@@ -37,6 +37,8 @@ export const App = () => {
   const {fields, append, remove} = useFieldArray<FormArray, 'formData'>({
     // fields: 現在のフィールドの配列　.map()でループしてレンダリングする
     // name: フィールド配列の名前
+    // shouldUnregister: アンマウントになっているフィールドの値を非登録にするかどうか
+    // control: useFormで作成したcontrolオブジェクト
     control: control,
     name: 'formData',
   });
